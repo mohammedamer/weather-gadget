@@ -1,2 +1,2 @@
 run:
-	rsync -av --delete code.py lib /Volumes/CIRCUITPY/
+	rsync -av --delete src/code.py src/lib src/settings.toml /Volumes/CIRCUITPY/
