@@ -1,3 +1,4 @@
+import os
 import time
 import alarm
 import displayio
@@ -9,8 +10,8 @@ SCR_HEIGHT = 128
 SCR_WIDTH = 296
 
 # ---- Config ----
-LAT = 51.51
-LON = -0.59
+LAT = os.getenv("LAT")
+LON = os.getenv("LON")
 
 # Update every 30 minutes (battery-friendly)
 SLEEP_SECONDS = 30 * 60
