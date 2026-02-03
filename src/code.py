@@ -1,5 +1,6 @@
 import time
 import alarm
+import displayio
 from adafruit_magtag.magtag import MagTag
 
 from util.datetime import argmin_time
@@ -21,11 +22,11 @@ URL = (
     "&timezone=Europe%2FLondon"
 )
 
-FONT = "/fonts/Arial-12.bdf"
-BG = "/bmp/bg.bmp"
+FONT = "/fonts/Arial-Bold-12.pcf"
 
 # ---- Init MagTag ----
 magtag = MagTag()
+display = magtag.graphics.display
 
 # Use built-in helpers (connects using settings.toml)
 magtag.network.connect()
@@ -35,40 +36,46 @@ r = magtag.network.requests.get(URL)
 data = r.json()
 r.close()
 
-# Parse
-temp_c = data["current"]["temperature_2m"]
-unit = data["current_units"]["temperature_2m"]
+root = magtag.graphics.root_group
 
-# precipitation_probability is hourly array; take the first hour as "now-ish"
+bg_bmp = displayio.OnDiskBitmap("/bmp/bg.bmp")
+bg = displayio.TileGrid(bg_bmp, pixel_shader=bg_bmp.pixel_shader)
+root.append(bg)
+
+therm_x = 50
+therm_y = 20
+
+icon_bmp = displayio.OnDiskBitmap("/bmp/therm.bmp")
+icon = displayio.TileGrid(
+    icon_bmp, pixel_shader=icon_bmp.pixel_shader, x=therm_x, y=therm_y)
+root.append(icon)
+
+temp_c = int(round(float(data["current"]["temperature_2m"])))
+unit = data["current_units"]["temperature_2m"]
 
 hour_idx = argmin_time(data["current"]["time"], data["hourly"]["time"])
 
 rain_prob = data["hourly"]["precipitation_probability"][hour_idx]
 
-# ---- Display ----
-
-magtag.graphics.set_background(BG)
-
 text_idx = 0
-start_y = 10
 
 magtag.add_text(
     text_font=FONT,
-    text_position=(10, start_y),
+    text_position=(therm_x+25, therm_y+5),
     text_color=0x000000,
 )
-magtag.set_text(f"{temp_c:.1f} {unit}", text_idx, auto_refresh=False)
+magtag.set_text(f"{temp_c} {unit}", text_idx, auto_refresh=False)
 
 text_idx += 1
-start_y += 20
 
-magtag.add_text(
-    text_font=FONT,
-    text_position=(10, start_y),
-    text_color=0x000000
-)
-magtag.set_text(f"Rain: {rain_prob:d}%", text_idx, auto_refresh=False)
+# magtag.add_text(
+#     text_font=FONT,
+#     text_position=(10, start_y),
+#     text_color=0x000000
+# )
+# magtag.set_text(f"Rain: {rain_prob:d}%", text_idx, auto_refresh=False)
 
+display.root_group = root
 magtag.refresh()
 
 # ---- Deep sleep ----
