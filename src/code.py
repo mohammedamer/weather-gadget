@@ -3,7 +3,10 @@ import alarm
 import displayio
 from adafruit_magtag.magtag import MagTag
 
-from util.datetime import argmin_time
+from util.datetime import argmin_time, split_datetime
+
+SCR_HEIGHT = 128
+SCR_WIDTH = 296
 
 # ---- Config ----
 LAT = 51.51
@@ -22,7 +25,8 @@ URL = (
     "&timezone=Europe%2FLondon"
 )
 
-FONT = "/fonts/Arial-Bold-12.pcf"
+FONT_BOLD = "/fonts/Arial-Bold-12.pcf"
+FONT = "/fonts/Arial-12.bdf"
 
 # ---- Init MagTag ----
 magtag = MagTag()
@@ -42,12 +46,20 @@ bg_bmp = displayio.OnDiskBitmap("/bmp/bg.bmp")
 bg = displayio.TileGrid(bg_bmp, pixel_shader=bg_bmp.pixel_shader)
 root.append(bg)
 
-therm_x = 50
-therm_y = 20
+therm_x = 65
+therm_y = 30
 
 icon_bmp = displayio.OnDiskBitmap("/bmp/therm.bmp")
 icon = displayio.TileGrid(
     icon_bmp, pixel_shader=icon_bmp.pixel_shader, x=therm_x, y=therm_y)
+root.append(icon)
+
+drop_x = 165
+drop_y = 30
+
+icon_bmp = displayio.OnDiskBitmap("/bmp/drop.bmp")
+icon = displayio.TileGrid(
+    icon_bmp, pixel_shader=icon_bmp.pixel_shader, x=drop_x, y=drop_y)
 root.append(icon)
 
 temp_c = int(round(float(data["current"]["temperature_2m"])))
@@ -60,7 +72,7 @@ rain_prob = data["hourly"]["precipitation_probability"][hour_idx]
 text_idx = 0
 
 magtag.add_text(
-    text_font=FONT,
+    text_font=FONT_BOLD,
     text_position=(therm_x+25, therm_y+5),
     text_color=0x000000,
 )
@@ -68,12 +80,24 @@ magtag.set_text(f"{temp_c} {unit}", text_idx, auto_refresh=False)
 
 text_idx += 1
 
-# magtag.add_text(
-#     text_font=FONT,
-#     text_position=(10, start_y),
-#     text_color=0x000000
-# )
-# magtag.set_text(f"Rain: {rain_prob:d}%", text_idx, auto_refresh=False)
+magtag.add_text(
+    text_font=FONT_BOLD,
+    text_position=(drop_x+30, drop_y+5),
+    text_color=0x000000
+)
+magtag.set_text(f"{rain_prob:d}%", text_idx, auto_refresh=False)
+
+text_idx += 1
+
+magtag.add_text(
+    text_font=FONT,
+    text_position=(20, SCR_HEIGHT-30),
+    text_color=0x000000
+)
+
+date_now, time_now = split_datetime(data["current"]["time"])
+magtag.set_text(
+    f"Last updated: {time_now} {date_now}", text_idx, auto_refresh=False)
 
 display.root_group = root
 magtag.refresh()

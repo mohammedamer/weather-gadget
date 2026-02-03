@@ -46,3 +46,7 @@ def argmin_time(target: str, times: list[str]) -> int:
             argmin = idx
 
     return argmin
+
+
+def split_datetime(timestamp: str):
+    return timestamp.split("T")
