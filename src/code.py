@@ -2,6 +2,8 @@ import time
 import alarm
 from adafruit_magtag.magtag import MagTag
 
+from util.datetime import argmin_time
+
 # ---- Config ----
 LAT = 51.51
 LON = -0.59
@@ -35,9 +37,13 @@ r.close()
 
 # Parse
 temp_c = data["current"]["temperature_2m"]
+unit = data["current_units"]["temperature_2m"]
 
 # precipitation_probability is hourly array; take the first hour as "now-ish"
-rain_prob = data["hourly"]["precipitation_probability"][0]
+
+hour_idx = argmin_time(data["current"]["time"], data["hourly"]["time"])
+
+rain_prob = data["hourly"]["precipitation_probability"][hour_idx]
 
 # ---- Display ----
 
@@ -51,7 +57,7 @@ magtag.add_text(
     text_position=(10, start_y),
     text_color=0x000000,
 )
-magtag.set_text(f"{temp_c:.1f}C", text_idx, auto_refresh=False)
+magtag.set_text(f"{temp_c:.1f} {unit}", text_idx, auto_refresh=False)
 
 text_idx += 1
 start_y += 20

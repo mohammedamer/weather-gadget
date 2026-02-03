@@ -13,5 +13,8 @@ font:
 bmp:
 	rsync -av src/bmp /Volumes/CIRCUITPY/
 
+util:
+	rsync -av src/util /Volumes/CIRCUITPY/
+
 all:
 	rsync -av src/code.py src/lib src/settings.toml /Volumes/CIRCUITPY/
