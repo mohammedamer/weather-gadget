@@ -1,6 +1,5 @@
 import time
 import alarm
-import board
 from adafruit_magtag.magtag import MagTag
 
 # ---- Config ----
@@ -21,6 +20,7 @@ URL = (
 )
 
 FONT = "/fonts/Arial-12.bdf"
+BG = "/bmp/bg.bmp"
 
 # ---- Init MagTag ----
 magtag = MagTag()
@@ -40,28 +40,30 @@ temp_c = data["current"]["temperature_2m"]
 rain_prob = data["hourly"]["precipitation_probability"][0]
 
 # ---- Display ----
-magtag.graphics.set_background(0xFFFFFF)
+
+magtag.graphics.set_background(BG)
+
+text_idx = 0
+start_y = 10
 
 magtag.add_text(
     text_font=FONT,
-    text_position=(10, 5),
+    text_position=(10, start_y),
     text_color=0x000000,
 )
-magtag.set_text("Slough", 0)
+magtag.set_text(f"{temp_c:.1f}C", text_idx, auto_refresh=False)
+
+text_idx += 1
+start_y += 20
 
 magtag.add_text(
     text_font=FONT,
-    text_position=(10, 25),
+    text_position=(10, start_y),
     text_color=0x000000
 )
-magtag.set_text(f"{temp_c:.1f}C", 1)
+magtag.set_text(f"Rain: {rain_prob:d}%", text_idx, auto_refresh=False)
 
-magtag.add_text(
-    text_font=FONT,
-    text_position=(10, 45),
-    text_color=0x000000
-)
-magtag.set_text(f"Rain: {rain_prob:d}%", 2)
+magtag.refresh()
 
 # ---- Deep sleep ----
 time.sleep(2)  # let you see it update before sleeping
