@@ -3,6 +3,7 @@
 A weather gadget using MagTag and CircuitPython.
 
 ![magtag](images/magtag.jpeg)
+![magtag](images/magtag_case.jpeg)
 
 ## Acknowledgement
 
