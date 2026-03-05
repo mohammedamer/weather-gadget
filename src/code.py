@@ -5,6 +5,7 @@ import displayio
 from adafruit_magtag.magtag import MagTag
 
 from util.datetime import argmin_time, split_datetime
+from util.battery import lipo_percent
 
 SCR_HEIGHT = 128
 SCR_WIDTH = 296
@@ -63,6 +64,15 @@ icon = displayio.TileGrid(
     icon_bmp, pixel_shader=icon_bmp.pixel_shader, x=drop_x, y=drop_y)
 root.append(icon)
 
+battery_x = 20
+battery_y = SCR_HEIGHT-56
+
+icon_bmp = displayio.OnDiskBitmap("/bmp/battery.bmp")
+icon = displayio.TileGrid(
+    icon_bmp, pixel_shader=icon_bmp.pixel_shader, x=battery_x,
+    y=battery_y)
+root.append(icon)
+
 temp_c = int(round(float(data["current"]["temperature_2m"])))
 unit = data["current_units"]["temperature_2m"]
 
@@ -99,6 +109,19 @@ magtag.add_text(
 date_now, time_now = split_datetime(data["current"]["time"])
 magtag.set_text(
     f"Last updated: {time_now} {date_now}", text_idx, auto_refresh=False)
+
+text_idx += 1
+
+magtag.add_text(
+    text_font=FONT,
+    text_position=(battery_x+18, battery_y+1),
+    text_color=0x000000
+)
+
+battery_lvl = lipo_percent(magtag.peripherals.battery)
+
+magtag.set_text(
+    f"{battery_lvl}%", text_idx, auto_refresh=False)
 
 display.root_group = root
 magtag.refresh()
